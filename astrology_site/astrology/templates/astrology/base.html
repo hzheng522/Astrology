@@ -1,0 +1,91 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Astrology{% endblock %}</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-image: url("{% static 'astrology/background.avif' %}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 60px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding-top: 20px;
+            position: fixed;
+            height: 100%;
+            transition: width 0.3s ease;
+            overflow: hidden;
+        }
+
+        .sidebar:hover {
+            width: 220px;
+        }
+
+        .sidebar h2 {
+            padding-left: 10px;
+            font-size: 18px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar:hover h2 {
+            opacity: 1;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            margin: 15px 0;
+            font-size: 16px;
+            padding: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: background 0.2s;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .content {
+            margin-left: 60px;
+            padding: 40px;
+            color: white;
+            flex-grow: 1;
+            background-color: rgba(0, 0, 0, 0.3);
+            transition: margin-left 0.3s ease;
+            width: 100%;
+        }
+
+        .sidebar:hover ~ .content {
+            margin-left: 220px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Astrology</h2>
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'sign' %}">Sign</a>
+        <a href="{% url 'house' %}">House</a>
+        <a href="{% url 'planet' %}">Planet</a>
+        <a href="{% url 'chart' %}">Chart</a>
+    </div>
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

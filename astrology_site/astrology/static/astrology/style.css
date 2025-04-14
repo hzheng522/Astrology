@@ -1,0 +1,36 @@
+body {
+    font-family: 'Arial', sans-serif;
+    color: white;
+}
+
+.main-title {
+    text-align: center;
+    padding: 20px;
+    font-size: 3em;
+}
+
+.sidebar {
+    width: 200px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(222, 207, 207, 0.5);
+    padding: 20px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar a {
+    color: white;
+    text-decoration: none;
+}
+
+main {
+    margin-left: 220px;
+    padding: 20px;
+}
+
