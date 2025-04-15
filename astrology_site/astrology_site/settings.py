@@ -122,7 +122,6 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-import os
 # URL to use when referring to static files (in templates, etc.)
 STATIC_URL = '/static/'
 
