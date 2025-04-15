@@ -133,3 +133,9 @@ STATICFILES_DIRS = [
 
 # This is where `collectstatic` will copy all static files for production
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.pythonanywhere.com']
+
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
