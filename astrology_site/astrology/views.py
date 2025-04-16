@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from .forms import BirthChartForm
+import requests
 
 def home(request):
     return render(request, 'home.html')
@@ -8,9 +10,6 @@ def house(request):
 
 def planet(request):
     return render(request, 'planet.html')
-
-def chart(request):
-    return render(request, 'chart.html')
 
 def sign_view(request):
     signs = [
@@ -29,3 +28,34 @@ def sign_view(request):
     ]
     print("🪐 Signs loaded:", signs)
     return render(request, "sign.html", {"signs": signs})
+
+def birth_chart_view(request):
+    chart = None
+    if request.method == 'POST':
+        form = BirthChartForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+
+            # Call Astrology API
+            url = "https://json.astrologyapi.com/v1/western_horoscope"
+            user_id = "639878"
+            api_key = "96f03ec92d46776d0476ac84cfe7fe29fb638089"
+
+            payload = {
+                "name": data['name'] or "Anonymous",
+                "birth_date": str(data['birth_date']),
+                "birth_time": str(data['birth_time']),
+                "latitude": data['latitude'],
+                "longitude": data['longitude'],
+                "timezone": data['timezone']
+            }
+
+            response = requests.post(url, auth=(user_id, api_key), json=payload)
+            if response.status_code == 200:
+                chart = response.json()
+            else:
+                chart = {"error": f"API Error {response.status_code}: {response.text}"}
+    else:
+        form = BirthChartForm()
+
+    return render(request, 'chart.html', {'form': form, 'chart': chart})
