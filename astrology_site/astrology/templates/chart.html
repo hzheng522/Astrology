@@ -5,35 +5,35 @@
 {% block content %}
 <h2>Generate Your Birth Chart</h2>
 
-<form id="birthChartForm" method="POST" action="{% url 'chart' %}">
-  {% csrf_token %}
-  <label>Name: <input type="text" name="name" id="name" required></label><br>
-  <label>Birth Date: <input type="date" name="birthDate" id="birthDate" required></label><br>
-  <label>Birth Time: <input type="time" name="birthTime" id="birthTime" required></label><br>
-  <label>Location: 
-    <input type="text" name="location" id="location" placeholder="Enter city name" required>
-  </label><br>
-  <button type="submit">Generate</button>
-</form>
-
-<pre id="output"></pre>
-
-<script>
-  // Use Google Places Autocomplete for autofill suggestions
-  function initAutocomplete() {
-    const locationInput = document.getElementById('location');
-    const autocomplete = new google.maps.places.Autocomplete(locationInput, {
-      types: ['(cities)'], // Restrict to cities
-    });
-
-    autocomplete.addListener('place_changed', function () {
-      const place = autocomplete.getPlace();
-      if (!place.geometry) {
-        alert('No details available for the selected location.');
-        return;
-      }
-    });
-  }
-</script>
+<form id="birthChartForm" method="POST" action="{% url 'generate_chart' %}">
+    {% csrf_token %}
+    <label>Name: <input type="text" name="name" id="name" required></label><br>
+    <label>Birth Date: <input type="date" name="birthDate" id="birthDate" required></label><br>
+    <label>Birth Time: <input type="time" name="birthTime" id="birthTime" required></label><br>
+    <label>Location: 
+      <input type="text" name="location" id="location" placeholder="Enter city name" required>
+    </label><br>
+    <button type="submit">Generate</button>
+  </form>
+  
+  <pre id="output"></pre>
+  
+  <script>
+    // Use Google Places Autocomplete for autofill suggestions
+    function initAutocomplete() {
+      const locationInput = document.getElementById('location');
+      const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+        types: ['(cities)'], // Restrict to cities
+      });
+  
+      autocomplete.addListener('place_changed', function () {
+        const place = autocomplete.getPlace();
+        if (!place.geometry) {
+          alert('No details available for the selected location.');
+          return;
+        }
+      });
+    }
+  </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJ_j6a08JzKJIq_gCzcj96G8Mc8P-1Bu4&libraries=places&callback=initAutocomplete" async defer></script>
 {% endblock %}

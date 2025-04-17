@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from .forms import BirthChartForm
 from django.http import JsonResponse
 import requests
 
@@ -86,3 +85,48 @@ def birth_chart_view(request):
 
     return render(request, 'chart.html')
 
+def generate_chart(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        birth_date = request.POST.get('birthDate')
+        birth_time = request.POST.get('birthTime')
+        location = request.POST.get('location')
+
+        # Fetch latitude, longitude, and time zone using OpenCage Geocoder API
+        geocode_api_key = 'ece828a9eae84768b3b3dca6b2107b56'
+        geocode_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&key={geocode_api_key}'
+        geocode_response = requests.get(geocode_url).json()
+
+        if geocode_response['results']:
+            result = geocode_response['results'][0]
+            lat = result['geometry']['lat']
+            lon = result['geometry']['lng']
+            timezone = result['annotations']['timezone']['offset_sec'] / 3600  # Convert seconds to hours
+
+            # Generate the birth chart using Astrology API
+            astrology_api_key = "639878"
+            astrology_user_id = "96f03ec92d46776d0476ac84cfe7fe29fb638089"
+            astrology_url = 'https://json.astrologyapi.com/v1/natal_wheel_chart'
+            auth = (astrology_user_id, astrology_api_key)
+
+            data = {
+                'day': int(birth_date.split('-')[2]),
+                'month': int(birth_date.split('-')[1]),
+                'year': int(birth_date.split('-')[0]),
+                'hour': int(birth_time.split(':')[0]),
+                'min': int(birth_time.split(':')[1]),
+                'lat': lat,
+                'lon': lon,
+                'tzone': timezone,
+            }
+
+            astrology_response = requests.post(astrology_url, json=data, auth=auth).json()
+
+            if 'chart_url' in astrology_response:
+                return render(request, 'chart_result.html', {'chart_url': astrology_response['chart_url']})
+            else:
+                return JsonResponse({'error': 'Failed to generate chart.'}, status=500)
+        else:
+            return JsonResponse({'error': 'Failed to fetch location data.'}, status=400)
+
+    return render(request, 'chart.html')
