@@ -5,64 +5,35 @@
 {% block content %}
 <h2>Generate Your Birth Chart</h2>
 
-<div style="display: flex; gap: 20px;">
-  <!-- Form Section -->
-  <div>
-    <form id="birthChartForm">
-      {% csrf_token %}
-      <label>Name: <input type="text" name="name" id="name" required></label><br>
-      <label>Birth Date: <input type="date" name="birthDate" id="birthDate" required></label><br>
-      <label>Birth Time: <input type="time" name="birthTime" id="birthTime" required></label><br>
-      <label>Location: 
-        <input type="text" name="location" id="location" placeholder="Enter city name" required>
-      </label><br>
-      <button type="submit">Generate</button>
-    </form>
-  </div>
+<form id="birthChartForm" method="POST" action="{% url 'chart' %}">
+  {% csrf_token %}
+  <label>Name: <input type="text" name="name" id="name" required></label><br>
+  <label>Birth Date: <input type="date" name="birthDate" id="birthDate" required></label><br>
+  <label>Birth Time: <input type="time" name="birthTime" id="birthTime" required></label><br>
+  <label>Location: 
+    <input type="text" name="location" id="location" placeholder="Enter city name" required>
+  </label><br>
+  <button type="submit">Generate</button>
+</form>
 
-  <!-- Chart Section -->
-  <div id="chartContainer">
-    <h3>Your Birth Chart</h3>
-    <div id="chartOutput">
-      <p>No chart generated yet.</p>
-    </div>
-  </div>
-</div>
+<pre id="output"></pre>
 
 <script>
-  document.getElementById('birthChartForm').addEventListener('submit', function (e) {
-    e.preventDefault(); // Prevent the default form submission
+  // Use Google Places Autocomplete for autofill suggestions
+  function initAutocomplete() {
+    const locationInput = document.getElementById('location');
+    const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+      types: ['(cities)'], // Restrict to cities
+    });
 
-    const formData = new FormData(this);
-
-    fetch("{% url 'generate_chart' %}", {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+    autocomplete.addListener('place_changed', function () {
+      const place = autocomplete.getPlace();
+      if (!place.geometry) {
+        alert('No details available for the selected location.');
+        return;
       }
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        const chartOutput = document.getElementById('chartOutput');
-        if (data.chart_url) {
-          // Display the chart
-          chartOutput.innerHTML = `<img src="${data.chart_url}" alt="Birth Chart" style="max-width: 100%;">`;
-        } else if (data.error) {
-          // Display the error message
-          chartOutput.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('chartOutput').innerHTML = `<p style="color: red;">An error occurred. Please try again.</p>`;
-      });
-  });
+    });
+  }
 </script>
-
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJ_j6a08JzKJIq_gCzcj96G8Mc8P-1Bu4&libraries=places&callback=initAutocomplete" async defer></script>
 {% endblock %}

@@ -9,7 +9,6 @@ urlpatterns = [
     path('house/', views.house, name='house'),
     path('planet/', views.planet, name='planet'),
     path('chart/', views.birth_chart_view, name='chart'),
-    path('generate_chart/', views.generate_chart, name='generate_chart'),
 ]
 
 from django.conf import settings
