@@ -1,0 +1,9 @@
+{% extends "astrology/base.html" %}
+
+{% block title %}Chart Result | Astrology{% endblock %}
+
+{% block content %}
+<h2>Your Birth Chart</h2>
+<img src="{{ chart_url }}" alt="Birth Chart" style="max-width: 100%;">
+<a href="{% url 'generate_chart' %}">Generate Another Chart</a>
+{% endblock %}
