@@ -3,81 +3,37 @@
 {% block title %}Chart | Astrology{% endblock %}
 
 {% block content %}
-<!-- templates/astrology/chart.html -->
-
 <h2>Generate Your Birth Chart</h2>
 
-<form id="birthChartForm">
-  <label>Name: <input type="text" id="name"></label><br>
-  <label>Birth Date: <input type="date" id="birthDate"></label><br>
-  <label>Birth Time: <input type="time" id="birthTime"></label><br>
-  <label>Latitude: <input type="number" id="latitude" step="any"></label><br>
-  <label>Longitude: <input type="number" id="longitude" step="any"></label><br>
-  <label>Time Zone: <input type="number" id="timezone" step="any"></label><br>
+<form id="birthChartForm" method="POST" action="{% url 'chart' %}">
+  {% csrf_token %}
+  <label>Name: <input type="text" name="name" id="name" required></label><br>
+  <label>Birth Date: <input type="date" name="birthDate" id="birthDate" required></label><br>
+  <label>Birth Time: <input type="time" name="birthTime" id="birthTime" required></label><br>
+  <label>Location: 
+    <input type="text" name="location" id="location" placeholder="Enter city name" required>
+  </label><br>
   <button type="submit">Generate</button>
 </form>
 
 <pre id="output"></pre>
 
 <script>
-document.getElementById('birthChartForm').addEventListener('submit', function(e) {
-  e.preventDefault();
+  // Use Google Places Autocomplete for autofill suggestions
+  function initAutocomplete() {
+    const locationInput = document.getElementById('location');
+    const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+      types: ['(cities)'], // Restrict to cities
+    });
 
-  const [year, month, day] = document.getElementById('birthDate').value.split('-');
-  const [hour, min] = document.getElementById('birthTime').value.split(':');
-
-  const data = {
-    day: parseInt(day),
-    month: parseInt(month),
-    year: parseInt(year),
-    hour: parseInt(hour),
-    min: parseInt(min),
-    lat: parseFloat(document.getElementById('latitude').value),
-    lon: parseFloat(document.getElementById('longitude').value),
-    tzone: parseFloat(document.getElementById('timezone').value),
-  };
-
-  const userId = '639878';  
-  const apiKey = '96f03ec92d46776d0476ac84cfe7fe29fb638089';
-  const language = 'en';
-  const api = 'natal_wheel_chart';
-
-  const auth = "Basic " + btoa(userId + ":" + apiKey);
-
-  fetch(`https://json.astrologyapi.com/v1/${api}`, {
-    method: 'POST',
-    headers: {
-      'Authorization': auth,
-      'Content-Type': 'application/json',
-      'Accept-Language': language
-    },
-    body: JSON.stringify(data)
-  })
-  .then(response => response.json())
-  .then(json => {
-    console.log(json);
-
-    // Clear previous output
-    const output = document.getElementById('output');
-    output.textContent = '';
-
-    // Check if the response contains the image URL
-    if (json.chart_url) {
-      // Create an <img> element and set its src to the chart URL
-      const img = document.createElement('img');
-      img.src = json.chart_url;
-      img.alt = 'Birth Chart';
-      img.style.maxWidth = '100%'; // Optional: Make the image responsive
-      output.appendChild(img);
-    } else {
-      output.textContent = 'No chart URL found in the response.';
-    }
-  })
-  .catch(err => {
-    console.error(err);
-    document.getElementById('output').textContent = 'Something went wrong!';
-  });
-});
+    autocomplete.addListener('place_changed', function () {
+      const place = autocomplete.getPlace();
+      if (!place.geometry) {
+        alert('No details available for the selected location.');
+        return;
+      }
+    });
+  }
 </script>
-
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJ_j6a08JzKJIq_gCzcj96G8Mc8P-1Bu4&libraries=places&callback=initAutocomplete" async defer></script>
 {% endblock %}
