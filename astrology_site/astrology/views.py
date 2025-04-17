@@ -65,7 +65,17 @@ def birth_chart_view(request):
                 'tzone': timezone,
             }
 
-            astrology_response = requests.post(astrology_url, json=data, auth=auth).json()
+            proxies = {
+                'http': 'http://proxy.server:3128',
+                'https': 'http://proxy.server:3128',
+            }
+
+            astrology_response = requests.post(
+                astrology_url,
+                json=data,
+                auth=auth,
+                proxies=proxies
+            ).json()
 
             if 'chart_url' in astrology_response:
                 return render(request, 'chart_result.html', {'chart_url': astrology_response['chart_url']})
