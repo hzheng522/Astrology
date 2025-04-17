@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from .forms import BirthChartForm
-from django.http import JsonResponse
 import requests
 
 def home(request):
@@ -31,48 +30,32 @@ def sign_view(request):
     return render(request, "sign.html", {"signs": signs})
 
 def birth_chart_view(request):
+    chart = None
     if request.method == 'POST':
-        name = request.POST.get('name')
-        birth_date = request.POST.get('birthDate')
-        birth_time = request.POST.get('birthTime')
-        location = request.POST.get('location')
+        form = BirthChartForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
 
-        # Fetch latitude, longitude, and time zone using OpenCage Geocoder API
-        geocode_api_key = 'ece828a9eae84768b3b3dca6b2107b56'
-        geocode_url = f'https://api.opencagedata.com/geocode/v1/json?q={location}&key={geocode_api_key}'
-        geocode_response = requests.get(geocode_url).json()
+            # Call Astrology API
+            url = "https://json.astrologyapi.com/v1/western_horoscope"
+            user_id = "639878"
+            api_key = "96f03ec92d46776d0476ac84cfe7fe29fb638089"
 
-        if geocode_response['results']:
-            result = geocode_response['results'][0]
-            lat = result['geometry']['lat']
-            lon = result['geometry']['lng']
-            timezone = result['annotations']['timezone']['offset_sec'] / 3600  # Convert seconds to hours
-
-            # Generate the birth chart using Astrology API
-            astrology_api_key = "639878"
-            astrology_user_id = "96f03ec92d46776d0476ac84cfe7fe29fb638089"
-            astrology_url = 'https://json.astrologyapi.com/v1/natal_wheel_chart'
-            auth = (astrology_user_id, astrology_api_key)
-
-            data = {
-                'day': int(birth_date.split('-')[2]),
-                'month': int(birth_date.split('-')[1]),
-                'year': int(birth_date.split('-')[0]),
-                'hour': int(birth_time.split(':')[0]),
-                'min': int(birth_time.split(':')[1]),
-                'lat': lat,
-                'lon': lon,
-                'tzone': timezone,
+            payload = {
+                "name": data['name'] or "Anonymous",
+                "birth_date": str(data['birth_date']),
+                "birth_time": str(data['birth_time']),
+                "latitude": data['latitude'],
+                "longitude": data['longitude'],
+                "timezone": data['timezone']
             }
 
-            astrology_response = requests.post(astrology_url, json=data, auth=auth).json()
-
-            if 'chart_url' in astrology_response:
-                return render(request, 'chart_result.html', {'chart_url': astrology_response['chart_url']})
+            response = requests.post(url, auth=(user_id, api_key), json=payload)
+            if response.status_code == 200:
+                chart = response.json()
             else:
-                return JsonResponse({'error': 'Failed to generate chart.'}, status=500)
-        else:
-            return JsonResponse({'error': 'Failed to fetch location data.'}, status=400)
+                chart = {"error": f"API Error {response.status_code}: {response.text}"}
+    else:
+        form = BirthChartForm()
 
-    return render(request, 'chart.html')
-
+    return render(request, 'chart.html', {'form': form, 'chart': chart})
