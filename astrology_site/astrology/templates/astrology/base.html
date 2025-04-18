@@ -4,12 +4,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap" rel="stylesheet">
+
     <style>
         html, body {
             margin: 0; /* Remove default margin */
             padding: 0; /* Remove default padding */
             box-shadow: none; /* Remove any shadow applied to the body or html */
             overflow-x: hidden; /* Prevent horizontal scrolling */
+        
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        label, input, button {
+            font-family: inherit;
+            font-size: 1rem;
         }
 
         /* Video background styling */
@@ -73,7 +89,8 @@
             color: white;
             text-decoration: none;
             margin: 15px 0;
-            font-size: 16px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px;
             padding: 10px;
             padding-left: 20px; 
             white-space: nowrap;
@@ -107,6 +124,7 @@
             transition: margin-left 0.3s ease;
             width: 100%;
             box-shadow: none;
+            font-family: 'Cormorant Garamond', serif;
         }
     
         .sidebar:hover ~ .content {
@@ -147,6 +165,20 @@
             opacity: 0.6; /* Make the image slightly transparent */
         }
 
+        button {
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #fff;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 10px #fff;
+        }
     </style>
 </head>
 <body>

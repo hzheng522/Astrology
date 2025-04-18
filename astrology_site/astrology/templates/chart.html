@@ -3,21 +3,126 @@
 {% block title %}Chart | Astrology{% endblock %}
 
 {% block content %}
-<!-- templates/astrology/chart.html -->
+<style>
+  .chart-container {
+    display: flex;
+    gap: 30px;
+    margin-top: 40px;
+    align-items: flex-start;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+  }
 
-<h2>Generate Your Birth Chart</h2>
+  .form-box {
+    flex: 1;
+    background-color: #1e1e2f;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    color: #fff;
+  }
 
-<form id="birthChartForm">
-  <label>Name: <input type="text" id="name"></label><br>
-  <label>Birth Date: <input type="date" id="birthDate"></label><br>
-  <label>Birth Time: <input type="time" id="birthTime"></label><br>
-  <label>Latitude: <input type="number" id="latitude" step="any"></label><br>
-  <label>Longitude: <input type="number" id="longitude" step="any"></label><br>
-  <label>Time Zone: <input type="number" id="timezone" step="any"></label><br>
-  <button type="submit">Generate</button>
-</form>
+  .form-box h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #ffcc70;
+  }
 
-<pre id="output"></pre>
+  .form-group {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group label {
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: #dcdcdc;
+  }
+
+  .form-group input {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #444;
+    background-color: #2d2d44;
+    color: #fff;
+    transition: border 0.3s;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #ffcc70;
+  }
+
+  .form-box button {
+    padding: 12px 20px;
+    background: #ffcc70;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #333;
+    transition: background 0.3s ease;
+  }
+
+  .form-box button:hover {
+    background: #ffdd88;
+  }
+
+  #output {
+    flex: 1;
+    background-color: #0e0e1a;
+    padding: 30px;
+    border-radius: 16px;
+    min-height: 400px;
+    color: white;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  }
+
+  #output img {
+    max-width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 0 10px rgba(255, 204, 112, 0.2);
+  }
+</style>
+
+<div class="chart-container">
+  <div class="form-box">
+    <h2>🌟 Generate Your Birth Chart</h2>
+    <form id="birthChartForm">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" />
+      </div>
+      <div class="form-group">
+        <label for="birthDate">Birth Date</label>
+        <input type="date" id="birthDate" />
+      </div>
+      <div class="form-group">
+        <label for="birthTime">Birth Time</label>
+        <input type="time" id="birthTime" />
+      </div>
+      <div class="form-group">
+        <label for="latitude">Latitude</label>
+        <input type="number" id="latitude" step="any" />
+      </div>
+      <div class="form-group">
+        <label for="longitude">Longitude</label>
+        <input type="number" id="longitude" step="any" />
+      </div>
+      <div class="form-group">
+        <label for="timezone">Time Zone</label>
+        <input type="number" id="timezone" step="any" />
+      </div>
+      <button type="submit">🔮 Generate</button>
+    </form>
+  </div>
+
+  <div id="output">
+    <p>Your chart will appear here ✨</p>
+  </div>
+</div>
 
 <script>
 document.getElementById('birthChartForm').addEventListener('submit', function(e) {
@@ -44,6 +149,9 @@ document.getElementById('birthChartForm').addEventListener('submit', function(e)
 
   const auth = "Basic " + btoa(userId + ":" + apiKey);
 
+  const output = document.getElementById('output');
+  output.innerHTML = '<p>✨ Generating chart...</p>';
+
   fetch(`https://json.astrologyapi.com/v1/${api}`, {
     method: 'POST',
     headers: {
@@ -55,19 +163,12 @@ document.getElementById('birthChartForm').addEventListener('submit', function(e)
   })
   .then(response => response.json())
   .then(json => {
-    console.log(json);
+    output.innerHTML = '';
 
-    // Clear previous output
-    const output = document.getElementById('output');
-    output.textContent = '';
-
-    // Check if the response contains the image URL
     if (json.chart_url) {
-      // Create an <img> element and set its src to the chart URL
       const img = document.createElement('img');
       img.src = json.chart_url;
       img.alt = 'Birth Chart';
-      img.style.maxWidth = '100%'; // Optional: Make the image responsive
       output.appendChild(img);
     } else {
       output.textContent = 'No chart URL found in the response.';
@@ -75,7 +176,7 @@ document.getElementById('birthChartForm').addEventListener('submit', function(e)
   })
   .catch(err => {
     console.error(err);
-    document.getElementById('output').textContent = 'Something went wrong!';
+    output.textContent = 'Something went wrong!';
   });
 });
 </script>
