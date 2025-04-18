@@ -14,17 +14,17 @@
   }
 
   .form-box {
-    flex: 1;
-    background-color: #1e1e2f;
-    padding: 30px;
+    flex: 0.7;
+    background-color: rgba(30, 30, 47, 0.8);
+    padding: 25px;
     border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
     color: #fff;
   }
 
   .form-box h2 {
     margin-bottom: 20px;
-    font-size: 24px;
+    font-size: 22px;
     color: #ffcc70;
   }
 
@@ -55,7 +55,7 @@
   }
 
   .form-box button {
-    padding: 12px 20px;
+    padding: 10px 16px;
     background: #ffcc70;
     border: none;
     border-radius: 10px;
@@ -71,13 +71,13 @@
 
   #output {
     flex: 1;
-    background-color: #0e0e1a;
-    padding: 30px;
+    background-color: rgba(14, 14, 26, 0.85);
+    padding: 25px;
     border-radius: 16px;
     min-height: 400px;
     color: white;
     text-align: center;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
   }
 
   #output img {
@@ -93,27 +93,19 @@
     <form id="birthChartForm">
       <div class="form-group">
         <label for="name">Name</label>
-        <input type="text" id="name" />
+        <input type="text" id="name" required />
       </div>
       <div class="form-group">
         <label for="birthDate">Birth Date</label>
-        <input type="date" id="birthDate" />
+        <input type="date" id="birthDate" required />
       </div>
       <div class="form-group">
         <label for="birthTime">Birth Time</label>
-        <input type="time" id="birthTime" />
+        <input type="time" id="birthTime" required />
       </div>
       <div class="form-group">
-        <label for="latitude">Latitude</label>
-        <input type="number" id="latitude" step="any" />
-      </div>
-      <div class="form-group">
-        <label for="longitude">Longitude</label>
-        <input type="number" id="longitude" step="any" />
-      </div>
-      <div class="form-group">
-        <label for="timezone">Time Zone</label>
-        <input type="number" id="timezone" step="any" />
+        <label for="city">City of Birth</label>
+        <input type="text" id="city" placeholder="e.g. Paris, France" required />
       </div>
       <button type="submit">🔮 Generate</button>
     </form>
@@ -128,56 +120,78 @@
 document.getElementById('birthChartForm').addEventListener('submit', function(e) {
   e.preventDefault();
 
+  const city = document.getElementById('city').value;
   const [year, month, day] = document.getElementById('birthDate').value.split('-');
   const [hour, min] = document.getElementById('birthTime').value.split(':');
 
-  const data = {
-    day: parseInt(day),
-    month: parseInt(month),
-    year: parseInt(year),
-    hour: parseInt(hour),
-    min: parseInt(min),
-    lat: parseFloat(document.getElementById('latitude').value),
-    lon: parseFloat(document.getElementById('longitude').value),
-    tzone: parseFloat(document.getElementById('timezone').value),
-  };
-
-  const userId = '639878';  
-  const apiKey = '96f03ec92d46776d0476ac84cfe7fe29fb638089';
-  const language = 'en';
-  const api = 'natal_wheel_chart';
-
-  const auth = "Basic " + btoa(userId + ":" + apiKey);
-
   const output = document.getElementById('output');
-  output.innerHTML = '<p>✨ Generating chart...</p>';
+  output.innerHTML = '<p>🧭 Getting location info...</p>';
 
-  fetch(`https://json.astrologyapi.com/v1/${api}`, {
-    method: 'POST',
-    headers: {
-      'Authorization': auth,
-      'Content-Type': 'application/json',
-      'Accept-Language': language
-    },
-    body: JSON.stringify(data)
-  })
-  .then(response => response.json())
-  .then(json => {
-    output.innerHTML = '';
+  const opencageKey = 'ece828a9eae84768b3b3dca6b2107b56';
+  const opencageUrl = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(city)}&key=${opencageKey}`;
 
-    if (json.chart_url) {
-      const img = document.createElement('img');
-      img.src = json.chart_url;
-      img.alt = 'Birth Chart';
-      output.appendChild(img);
-    } else {
-      output.textContent = 'No chart URL found in the response.';
-    }
-  })
-  .catch(err => {
-    console.error(err);
-    output.textContent = 'Something went wrong!';
-  });
+  fetch(opencageUrl)
+    .then(response => response.json())
+    .then(data => {
+      if (!data.results.length) {
+        output.innerHTML = '<p>❌ Could not find city. Please check your input.</p>';
+        return;
+      }
+
+      const location = data.results[0];
+      const lat = location.geometry.lat;
+      const lon = location.geometry.lng;
+      const timezone = location.annotations.timezone.offset_sec / 3600;
+
+      const requestData = {
+        day: parseInt(day),
+        month: parseInt(month),
+        year: parseInt(year),
+        hour: parseInt(hour),
+        min: parseInt(min),
+        lat: lat,
+        lon: lon,
+        tzone: timezone
+      };
+
+      output.innerHTML = '<p>✨ Generating chart...</p>';
+
+      const userId = '639878';
+      const apiKey = '96f03ec92d46776d0476ac84cfe7fe29fb638089';
+      const language = 'en';
+      const api = 'natal_wheel_chart';
+      const auth = "Basic " + btoa(userId + ":" + apiKey);
+
+      fetch(`https://json.astrologyapi.com/v1/${api}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': auth,
+          'Content-Type': 'application/json',
+          'Accept-Language': language
+        },
+        body: JSON.stringify(requestData)
+      })
+      .then(response => response.json())
+      .then(json => {
+        output.innerHTML = '';
+        if (json.chart_url) {
+          const img = document.createElement('img');
+          img.src = json.chart_url;
+          img.alt = 'Birth Chart';
+          output.appendChild(img);
+        } else {
+          output.textContent = 'No chart URL found in the response.';
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        output.textContent = 'Something went wrong!';
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      output.innerHTML = '<p>🌍 Location lookup failed.</p>';
+    });
 });
 </script>
 
